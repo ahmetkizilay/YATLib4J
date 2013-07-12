@@ -79,11 +79,12 @@ public class TwitterRequestWrapper {
 			response.setSuccess(false);
 			
 			if(conn != null) {
+				response.setResponse(getResponseFromGZIPErrorStream(conn.getErrorStream()));
 				try {
 					response.setResponseCode(conn.getResponseCode());
-					response.setResponse(conn.getResponseMessage());					
+					response.setResponseMessage(conn.getResponseMessage());					
 				}
-				catch(Exception exp) {}
+				catch(IOException exp) {}
 			}
 			
 			return response;
@@ -134,11 +135,12 @@ public class TwitterRequestWrapper {
 			response.setSuccess(false);
 			
 			if(conn != null) {
+				response.setResponse(getResponseFromGZIPErrorStream(conn.getErrorStream()));
 				try {
 					response.setResponseCode(conn.getResponseCode());
-					response.setResponse(conn.getResponseMessage());					
+					response.setResponseMessage(conn.getResponseMessage());					
 				}
-				catch(Exception exp) {}
+				catch(IOException exp) {}
 			}
 			
 			return response;
@@ -207,11 +209,12 @@ public class TwitterRequestWrapper {
 			response.setSuccess(false);
 			
 			if(conn != null) {
+				response.setResponse(getResponseFromErrorStream(conn.getErrorStream()));
 				try {
 					response.setResponseCode(conn.getResponseCode());
-					response.setResponse(conn.getResponseMessage());					
+					response.setResponseMessage(conn.getResponseMessage());					
 				}
-				catch(Exception exp) {}
+				catch(IOException exp) {}
 			}
 			
 			return response;
@@ -267,17 +270,64 @@ public class TwitterRequestWrapper {
 			response.setSuccess(false);
 			
 			if(conn != null) {
-				try {
+				response.setResponse(getResponseFromErrorStream(conn.getErrorStream()));
+				try {				
 					response.setResponseCode(conn.getResponseCode());
-					response.setResponse(conn.getResponseMessage());					
+					response.setResponseMessage(conn.getResponseMessage());					
 				}
-				catch(Exception exp) {}
+				catch(IOException exp) {}
 			}
 			
 			return response;
 		}
 		finally {
 			if(in != null) { try{ in.close(); }catch(Exception exp){} }
+		}
+	}
+	
+	private static String getResponseFromErrorStream(InputStream es) {
+		BufferedReader in = null;
+		try {
+			in = new BufferedReader(new InputStreamReader(es));
+			
+			StringBuffer sb = new StringBuffer();
+			String lineRead;
+			
+			while((lineRead = in.readLine()) != null) {
+				sb.append(lineRead); sb.append("\n");
+			}
+			sb.setLength(sb.length() - 1);
+			
+			return sb.toString();
+		}
+		catch(Exception exp) {
+			exp.printStackTrace();
+			return null;
+		}
+		finally {
+			if(in != null) try { in.close(); }catch(Exception exp) {}
+		}
+	}
+	
+	private static String getResponseFromGZIPErrorStream(InputStream es) {
+		ByteArrayOutputStream baos = null;
+		try {
+			baos = new ByteArrayOutputStream();
+			
+			byte[] buffer = new byte[2048];
+			int bytes_read;
+			while((bytes_read = es.read(buffer)) != -1) {
+				baos.write(buffer, 0, bytes_read);
+			}
+			
+			return GenericUtils.decompressGZIPData(baos.toByteArray());
+		}
+		catch(Exception exp) {
+			exp.printStackTrace();
+			return null;
+		}
+		finally {
+			if(baos != null) try { baos.close(); }catch(Exception exp) {}
 		}
 	}
 }
