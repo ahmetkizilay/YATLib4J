@@ -4,6 +4,7 @@ public class TwitterResponseWrapper {
 	private boolean mSuccess;
 	private int mResponseCode;
 	private String mResponse;
+	private String mResponseMessage;
 	
 	public boolean isSuccess() {
 		return this.mSuccess;
@@ -19,6 +20,14 @@ public class TwitterResponseWrapper {
 	
 	public void setResponseCode(int responseCode) {
 		this.mResponseCode = responseCode;
+	}
+	
+	public String getResponseMessage() {
+		return this.mResponseMessage;
+	}
+	
+	public void setResponseMessage(String responseMessage) {
+		this.mResponse = responseMessage;
 	}
 	
 	public String getResponse() {
