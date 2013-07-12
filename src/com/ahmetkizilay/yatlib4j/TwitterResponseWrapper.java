@@ -27,7 +27,7 @@ public class TwitterResponseWrapper {
 	}
 	
 	public void setResponseMessage(String responseMessage) {
-		this.mResponse = responseMessage;
+		this.mResponseMessage = responseMessage;
 	}
 	
 	public String getResponse() {
