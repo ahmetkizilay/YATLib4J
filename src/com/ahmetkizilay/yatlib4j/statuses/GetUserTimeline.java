@@ -32,11 +32,14 @@ public class GetUserTimeline {
 		return response;
 	}
 	
-	public static GetUserTimeline.Response sendRequest(GetUserTimeline.Parameters params, OAuthHolder oauthHolder) {
+	public static GetUserTimeline.Response sendRequest(GetUserTimeline.Parameters params, OAuthHolder oauthHolder) throws TwitterIOException {
 		Hashtable<String, String> httpParams = params.prepareParams();
 		String oauthHeader = OAuthUtils.generateOAuthHeader(HTTP_METHOD, BASE_URL, httpParams, oauthHolder);
 		
 		TwitterResponseWrapper twitterResponse = TwitterRequestWrapper.sendRequest(HTTP_METHOD, BASE_URL, httpParams, oauthHeader);
+		if(!twitterResponse.isSuccess()) {
+			throw new TwitterIOException(twitterResponse.getResponseCode(), twitterResponse.getResponse());
+		}
 		
 		GetUserTimeline.Response response = new GetUserTimeline.Response(twitterResponse.getResponse());
 		
