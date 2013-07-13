@@ -32,6 +32,46 @@ public final class OAuthUtils {
 		return GenericUtils.convertToHexString(randomBytes); 
 	}
 	
+	public static String generateSignInWithTwitterRequestHeader(String httpMethod, String baseHttpUrl, OAuthRequestParams oauthReqParams) {
+		String oauth_timestamp = OAuthUtils.generateTimeStamp();
+		String oauth_nonce = OAuthUtils.generateNonce();
+		
+		SortableKeyValueList sortableListWrapper = new SortableKeyValueList();
+		sortableListWrapper.add("oauth_callback", oauthReqParams.getOAuthCallback());
+		sortableListWrapper.add("oauth_consumer_key", oauthReqParams.getConsumerKey());
+		sortableListWrapper.add("oauth_nonce", oauth_nonce);		
+		sortableListWrapper.add("oauth_signature_method", "HMAC-SHA1");
+		sortableListWrapper.add("oauth_timestamp", oauth_timestamp);
+		sortableListWrapper.add("oauth_version", "1.0");
+
+		
+		ArrayList<SortableKeyValuePair> pairList = sortableListWrapper.getList();
+		String oauthSignature = "";
+		try {
+			String parameterString = OAuthUtils.buildParameterString(pairList);
+			
+			String signatureBaseString = OAuthUtils.buildSignatureBaseString(httpMethod, baseHttpUrl, parameterString);
+			
+			oauthSignature = OAuthUtils.calculateOAuthSignature(oauthReqParams.getConsumerSecret(), "", signatureBaseString);
+		}
+		catch(Exception exp) {
+			exp.printStackTrace();
+			return null;
+		}
+		
+		StringBuffer headerBuffer = new StringBuffer();
+		headerBuffer.append("OAuth ");
+		headerBuffer.append("oauth_callback=\"" + oauthReqParams.getOAuthCallback() + "\", ");
+		headerBuffer.append("oauth_consumer_key=\"" + oauthReqParams.getConsumerKey() + "\", ");
+		headerBuffer.append("oauth_nonce=\"" + oauth_nonce + "\", ");
+		headerBuffer.append("oauth_signature=\"" + oauthSignature + "\", ");
+		headerBuffer.append("oauth_signature_method=\"" + OAUTH_SIGNATURE_METHOD + "\", ");
+		headerBuffer.append("oauth_timestamp=\"" + oauth_timestamp + "\", ");
+		headerBuffer.append("oauth_version=\"" + DEFAULT_OAUTH_VERSION + "\"");
+
+		return headerBuffer.toString();		
+	}
+	
 	public static String generateAppOnlyAuthHeader(String consumerKey, String consumerSecret) {
 		try {
 			String bearerTokenCredential = GenericUtils.percentEncode(consumerKey) + ":" + GenericUtils.percentEncode(consumerSecret);
@@ -117,7 +157,7 @@ public final class OAuthUtils {
 		sb.append(GenericUtils.percentEncode(parameterString));
 		return sb.toString();
 	}
-	
+		
 	private static String calculateOAuthSignature(String consumerSecret, String oauthTokenSecret, String signatureBaseString) throws Exception {		
 		String key = consumerSecret + "&" + oauthTokenSecret;
 		SecretKeySpec signingKey = new SecretKeySpec(key.getBytes("UTF-8"), "HmacSHA1");
