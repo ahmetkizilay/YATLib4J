@@ -10,6 +10,7 @@ import net.minidev.json.JSONValue;
 import com.ahmetkizilay.yatlib4j.TwitterRequestWrapper;
 import com.ahmetkizilay.yatlib4j.TwitterResponseWrapper;
 import com.ahmetkizilay.yatlib4j.datatypes.Language;
+import com.ahmetkizilay.yatlib4j.exceptions.TwitterIOException;
 import com.ahmetkizilay.yatlib4j.oauthhelper.OAuthHolder;
 import com.ahmetkizilay.yatlib4j.oauthhelper.OAuthUtils;
 
@@ -18,11 +19,14 @@ public class GetLanguages {
 	private static final String BASE_URL = "https://api.twitter.com/1.1/help/languages.json";
 	private static final String HTTP_METHOD = "GET";
 	
-	public static GetLanguages.Response sendRequest(GetLanguages.Parameters params, OAuthHolder oauthHolder) {
+	public static GetLanguages.Response sendRequest(GetLanguages.Parameters params, OAuthHolder oauthHolder) throws TwitterIOException {
 		Hashtable<String, String> httpParams = params.prepareParams();
 		String oauthHeader = OAuthUtils.generateOAuthHeader(HTTP_METHOD, BASE_URL, httpParams, oauthHolder);
 		
 		TwitterResponseWrapper twitterResponse = TwitterRequestWrapper.sendRequest(HTTP_METHOD, BASE_URL, httpParams, oauthHeader);
+		if(!twitterResponse.isSuccess()) {
+			throw new TwitterIOException(twitterResponse.getResponseCode(), twitterResponse.getResponse());
+		}
 		
 		GetLanguages.Response response = new GetLanguages.Response(twitterResponse.getResponse());
 		
