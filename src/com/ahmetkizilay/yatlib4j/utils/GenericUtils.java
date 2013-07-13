@@ -94,13 +94,13 @@ public final class GenericUtils {
 		return sb.toString();
 	}
 	
-	public static String httpStringifyHashtable(Hashtable<String, String> hashtable) {
+	public static String httpStringifyHashtable(Hashtable<String, String> hashtable) throws Exception {
 		StringBuilder sb = new StringBuilder();
 		for(Enumeration<String> httpParamKeys = hashtable.keys(); httpParamKeys.hasMoreElements();) {
 			String key = httpParamKeys.nextElement();
 			sb.append(key);
 			sb.append("=");
-			sb.append(hashtable.get(key));
+			sb.append(GenericUtils.percentEncode(hashtable.get(key)));
 			sb.append("&");
 		}
 		
