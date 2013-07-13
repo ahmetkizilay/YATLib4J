@@ -39,9 +39,10 @@ public class TwitterRequestWrapper {
 		InputStream is = null;
 		TwitterResponseWrapper response = new TwitterResponseWrapper();
 		
-		String stringifiedParams = httpParams.size() > 0 ? GenericUtils.httpStringifyHashtable(httpParams) : "";
-				
+		
 		try {
+			String stringifiedParams = httpParams.size() > 0 ? GenericUtils.httpStringifyHashtable(httpParams) : "";
+			
 			URL u = new URL(baseUrl);
 			conn = (HttpURLConnection) u.openConnection();
 			conn.setDoOutput(true);
@@ -89,6 +90,11 @@ public class TwitterRequestWrapper {
 			
 			return response;
 		}
+		catch(Exception exp) {
+			response.setResponseCode(0);
+			response.setResponseMessage(exp.getMessage());
+			return response;
+		}
 		finally {
 			if(is != null) { try{ is.close(); }catch(Exception exp){} }
 		}
@@ -99,12 +105,12 @@ public class TwitterRequestWrapper {
 		InputStream is = null;
 		TwitterResponseWrapper response = new TwitterResponseWrapper();
 		
-		String combinedHttpUrl = baseUrl;
-		if(!httpParams.isEmpty()) {
-			combinedHttpUrl += "?" + GenericUtils.httpStringifyHashtable(httpParams);
-		}
-				
 		try {
+			String combinedHttpUrl = baseUrl;
+			if(!httpParams.isEmpty()) {
+				combinedHttpUrl += "?" + GenericUtils.httpStringifyHashtable(httpParams);
+			}
+			
 			URL u = new URL(combinedHttpUrl);
 			conn = (HttpURLConnection) u.openConnection();
 			conn.setDoOutput(true);
@@ -145,6 +151,11 @@ public class TwitterRequestWrapper {
 			
 			return response;
 		}
+		catch(Exception exp) {
+			response.setResponseCode(0);
+			response.setResponseMessage(exp.getMessage());
+			return response;
+		}
 		finally {
 			if(is != null) { try{ is.close(); }catch(Exception exp){} }
 		}
@@ -171,12 +182,14 @@ public class TwitterRequestWrapper {
 		BufferedReader in = null;
 		TwitterResponseWrapper response = new TwitterResponseWrapper();
 		
-		String combinedHttpUrl = baseUrl;
-		if(!httpParams.isEmpty()) {
-			combinedHttpUrl += "?" + GenericUtils.httpStringifyHashtable(httpParams);
-		}
+		
 		
 		try {
+			String combinedHttpUrl = baseUrl;
+			if(!httpParams.isEmpty()) {
+				combinedHttpUrl += "?" + GenericUtils.httpStringifyHashtable(httpParams);
+			}
+			
 			URL u = new URL(combinedHttpUrl);
 			conn = (HttpURLConnection) u.openConnection();
 			conn.setDoOutput(true);
@@ -219,6 +232,11 @@ public class TwitterRequestWrapper {
 			
 			return response;
 		}
+		catch(Exception exp) {
+			response.setResponseCode(0);
+			response.setResponseMessage(exp.getMessage());
+			return response;
+		}
 		finally {
 			if(in != null) { try{ in.close(); }catch(Exception exp){} }
 		}
@@ -228,10 +246,10 @@ public class TwitterRequestWrapper {
 		HttpURLConnection conn = null;
 		BufferedReader in = null;
 		TwitterResponseWrapper response = new TwitterResponseWrapper();
-		
-		String stringifiedParams = httpParams.size() > 0 ? GenericUtils.httpStringifyHashtable(httpParams) : "";
 				
 		try {
+			String stringifiedParams = httpParams.size() > 0 ? GenericUtils.httpStringifyHashtable(httpParams) : "";
+			
 			URL u = new URL(baseUrl);
 			conn = (HttpURLConnection) u.openConnection();
 			conn.setDoOutput(true);
@@ -278,6 +296,12 @@ public class TwitterRequestWrapper {
 				catch(IOException exp) {}
 			}
 			
+			return response;
+		}
+		catch(Exception exp) {
+				
+			response.setResponseCode(0);
+			response.setResponseMessage(exp.getMessage());					
 			return response;
 		}
 		finally {
