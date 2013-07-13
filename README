@@ -1,5 +1,8 @@
 YATLib4J - YET ANOTHER TWITTER CLIENT FOR JAVA
-Currently deep down in development - Please don't ever think of using it yet...
+implementing a JAVA wrapper over the Twitter REST API.
+Currently deep down in development, so expect some inconsistencies in the code and comment style.
+
+
 
 
 
