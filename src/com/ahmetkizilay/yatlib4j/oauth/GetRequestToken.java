@@ -2,22 +2,77 @@ package com.ahmetkizilay.yatlib4j.oauth;
 
 import java.util.Hashtable;
 
-import com.ahmetkizilay.yatlib4j.oauthhelper.OAuthHolder;
+import com.ahmetkizilay.yatlib4j.TwitterRequestWrapper;
+import com.ahmetkizilay.yatlib4j.TwitterResponseWrapper;
+import com.ahmetkizilay.yatlib4j.exceptions.TwitterIOException;
+import com.ahmetkizilay.yatlib4j.oauthhelper.OAuthRequestParams;
 import com.ahmetkizilay.yatlib4j.oauthhelper.OAuthUtils;
 
 public class GetRequestToken {
 	private static final String BASE_URL = "https://api.twitter.com/oauth/request_token";
 	private static final String HTTP_METHOD = "POST"; 
 	
-	public static GetRequestToken.Response sendRequest(GetRequestToken.Parameters params, OAuthHolder oauthHolder) {		
-		throw new UnsupportedOperationException();
+	public static GetRequestToken.Response sendRequest(OAuthRequestParams oauthReqParams) throws TwitterIOException {
+		GetRequestToken.Parameters params = new GetRequestToken.Parameters();
+//		params.setOAuthCallback(oauthReqParams.getOAuthCallback());
+//		params.setXAuthAccessType(oauthReqParams.getXAuthAccessType());
+		
+		Hashtable<String, String> httpParams = params.prepareParams();
+
+		String authHeader = OAuthUtils.generateSignInWithTwitterRequestHeader(HTTP_METHOD, BASE_URL, oauthReqParams);
+
+		TwitterResponseWrapper twitterResponse = TwitterRequestWrapper.sendRequestAppAuth(HTTP_METHOD, BASE_URL, httpParams, authHeader);
+		if(!twitterResponse.isSuccess()) {
+			throw new TwitterIOException(twitterResponse.getResponseCode(), twitterResponse.getResponse());
+		}
+		
+		return new Response(twitterResponse.getResponse());
 	}	
 	
 	public static class Response {
-		private String rawResponse;
+		private String mRawResponse;
+		private String mOAuthToken;
+		private String mOAuthTokenSecret;
+		private boolean mOAuthCallbackConfirmed;
 		
 		public Response(String rawResponse) {
-			this.rawResponse = rawResponse;
+			this.mRawResponse = rawResponse;
+			init();
+		}
+		
+		private void init() {
+			String[] parts = this.mRawResponse.split("&");
+			
+			for(int i = 0, len = parts.length; i < len; ++i) {
+				if(parts[i].startsWith("oauth_token=")) {
+					this.mOAuthToken = parts[i].substring(12);
+				}
+				else if(parts[i].startsWith("oauth_token_secret=")) {
+					this.mOAuthTokenSecret = parts[i].substring(19);
+				}
+				else if(parts[i].startsWith("oauth_callback_confirmed=")) {
+					this.mOAuthCallbackConfirmed = parts[i].substring(25).equalsIgnoreCase("true");
+				}
+				else {
+					// do nothing
+				}
+			}
+		}
+		
+		public String getRawResponse() {
+			return this.mRawResponse;
+		}
+		
+		public String getOAuthToken() {
+			return this.mOAuthToken;
+		}
+		
+		public String getOAuthTokenSecret() {
+			return this.mOAuthTokenSecret;
+		}
+		
+		public boolean isOAuthCallbackConfirmed() {
+			return this.mOAuthCallbackConfirmed;
 		}
 	}
 	
