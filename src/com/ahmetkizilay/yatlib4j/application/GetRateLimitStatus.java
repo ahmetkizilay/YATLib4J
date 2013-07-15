@@ -12,6 +12,7 @@ import com.ahmetkizilay.yatlib4j.exceptions.TwitterIOException;
 import com.ahmetkizilay.yatlib4j.oauthhelper.AppAuthHolder;
 import com.ahmetkizilay.yatlib4j.oauthhelper.OAuthHolder;
 import com.ahmetkizilay.yatlib4j.oauthhelper.OAuthUtils;
+import com.ahmetkizilay.yatlib4j.utils.GenericUtils;
 
 public class GetRateLimitStatus {
 	private static final String BASE_URL = "https://api.twitter.com/1.1/application/rate_limit_status.json";
@@ -19,7 +20,13 @@ public class GetRateLimitStatus {
 	
 	public static GetRateLimitStatus.Response sendRequest(GetRateLimitStatus.Parameters params, AppAuthHolder appAuthHolder) throws TwitterIOException {
 		Hashtable<String, String> httpParams = params.prepareParams();
-		String authHeader = appAuthHolder.getTokenType() + " " + appAuthHolder.getAccessToken();
+		String authHeader = appAuthHolder.getTokenType() + " ";
+		try {
+			authHeader += GenericUtils.percentEncode(appAuthHolder.getAccessToken());
+		}
+		catch(Exception exp) {
+			throw new TwitterIOException(0, "Unable To Encode Access Token");
+		}
 		
 		TwitterResponseWrapper twitterResponse = TwitterRequestWrapper.sendRequestAppAuth(HTTP_METHOD, BASE_URL, httpParams, authHeader);
 		if(!twitterResponse.isSuccess()) {
