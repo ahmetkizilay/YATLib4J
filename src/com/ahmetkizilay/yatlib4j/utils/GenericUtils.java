@@ -38,6 +38,33 @@ public final class GenericUtils {
 		
 		return sb.toString();
 	}
+	
+	public static byte[] convertFromHexString(String str) throws Exception {		
+		if((str.length() % 2) != 0) throw new Exception("Incompatible Hex String Length");
+		byte[] buffer = new byte[str.length() / 2];
+		for(int i = 0, j = 0, len = buffer.length; i < len; i = i + 2, ++j) {
+			buffer[j] = (byte) Integer.parseInt(str.substring(i, i+2), 16);
+		}
+		
+		return buffer;
+	}
+	
+	public static String percentDecode(String str) throws Exception {
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0, len = str.length(); i < len; ++i) {
+			char thisChar = str.charAt(i);
+			if(thisChar == '%') {
+				String subStr = str.substring(i+1, i+3);
+				sb.append((char) convertFromHexString(subStr)[0]);
+				i=i+2;
+			}
+			else {
+				sb.append((char) getCharFromPercentEncodeMap((byte) thisChar));
+			}
+		}
+		
+		return sb.toString();
+	}
 		
 	public static String percentEncode(String str) throws Exception {
 		byte[] bytes = str.getBytes("UTF-8");
